@@ -55,34 +55,43 @@ visualize_image(Xtr[0])
 
 # 2a) K-Nearest-Neighbor Funktion mit L1-Distanzmaß
 def predict_knn_l1(X_train, Y_train_labels, x_test_image, k):
-    # L1-Distanz berechnen: Summe der absoluten Differenzen zwischen dem Testbild und allen Trainingsbildern
-    # np.abs() berechnet den absoluten Wert, np.sum(..., axis=1) summiert die Zeilen
     distances = np.sum(np.abs(X_train - x_test_image), axis=1)
-
-    # Indizes der k kleinsten Distanzen finden (die k nächsten Nachbarn)
     min_indices = np.argsort(distances)[:k]
-
-    # Labels der k nächsten Nachbarn holen
     k_nearest_labels = Y_train_labels[min_indices]
-
-    # Majority Vote: Das häufigste Label ermitteln
-    # np.bincount zählt die Häufigkeit, argmax gibt den Index des Maximums zurück
     majority_label = np.bincount(k_nearest_labels).argmax()
-
     return majority_label
 
 
-# 2b) Vorhersage für die ersten 10 Testbilder durchführen
+# 2b) Vorhersage und Visualisierung für die ersten 10 Testbilder
 print("\nStarte KNN Vorhersage für die ersten 10 Testbilder (Das kann ein paar Sekunden dauern)...")
-k_value = 3  # Wir testen es erstmal mit K=3
+k_value = 3
 vorhersagen = []
 
-# Wir nehmen die ersten 10 Bilder aus Y (Testdaten)
+# Schritt 1: Schleife für die Vorhersagen der 10 Bilder
 for i in range(10):
     test_bild = Y[i]
-    # Vorhersage aufrufen
     vorhergesagtes_label = predict_knn_l1(Xtr, Y_train_labels, test_bild, k=k_value)
     vorhersagen.append(vorhergesagtes_label)
 
     wahres_label = Y_test_labels[i]
     print(f"Bild {i + 1} | Vorhersage: {vorhergesagtes_label} | Wahres Label: {wahres_label}")
+
+# Schritt 2: Visualisierung (Läuft erst, wenn die Schleife oben komplett fertig ist)
+print("\nErstelle die Visualisierung für die 10 Bilder...")
+klassen_namen = ['Flugzeug', 'Auto', 'Vogel', 'Katze', 'Reh', 'Hund', 'Frosch', 'Pferd', 'Schiff', 'LKW']
+
+plt.figure(figsize=(15, 6))
+
+for i in range(10):
+    plt.subplot(2, 5, i + 1)
+    img = Y[i].reshape(3, 32, 32).transpose(1, 2, 0)
+    plt.imshow(img)
+
+    vorhersage_name = klassen_namen[vorhersagen[i]]
+    wahres_name = klassen_namen[Y_test_labels[i]]
+
+    plt.title(f"Vorhersage: {vorhersage_name}\nWahr: {wahres_name}", fontsize=10)
+    plt.axis('off')
+
+plt.tight_layout()
+plt.show()
